@@ -33,10 +33,12 @@ No installation is required, just a single executable. To build from source:
 ##  User Guide
 
 ### 1. Starting the Monitor
+
+To compile the source, open a command prompt and run this , in the directory of the project: 
 ```
-To compile the source, open a command prompt and run this , in the directory of the project: cl main.cpp /link iphlpapi.lib ws2_32.lib
+cl main.cpp /link iphlpapi.lib ws2_32.lib
+```
 Open a command prompt (cmd or powershell) as Administrator and run the tool:
-```
 ```
 cmd NetMonitor.exe
 ```
@@ -84,4 +86,5 @@ UDP Discord.exe (9120) 0.0.0.0:50002
 
 ## Disclaimer
 This tool is for educational and administrative monitoring purposes. It reads system connection tables using standard Windows APIs (`GetExtendedTcpTable`). It does not packet sniff, intercept SSL, or modify traffic.
+
 
