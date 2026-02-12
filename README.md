@@ -1,85 +1,56 @@
-# Windows Network Connection Monitor
+# NetMonitor
 
-A lightweight C++ CLI tool for real-time monitoring of active network connections in Windows. It maps TCP/UDP sockets to their owning processes, flags suspicious activity, and logs events.
+A single-binary Windows network monitor. Maps every TCP/UDP socket to its owning process in real time, flags public and suspicious endpoints, and logs everything to disk.
 
+![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows-0078D6.svg)
 
-##  Key Features
+## Features
 
-*   **Real-Time Monitoring:** View active TCP and UDP connections as they happen.
-*   **Process Mapping:** Identifies the specific process (Name & PID) responsible for every connection.
-*   **Security Flagging:**
-    *   **[PUBLIC]**: Instantly spots connections to public/internet IP addresses.
-    *   **[SUSPICIOUS]**: Highlights connections on ports commonly associated with malware or vulnerabilities (e.g., 445 SMB, 3389 RDP). Edit the ports and services to your preferences in the source code.
-*   **Freeze/Pause Mode:** Press `P` to freeze the output for close inspection without stopping the application.
-*   **Background Logging:** Automatically saves all activity to `connections.log` for forensic review.
+- Live TCP connection table with process name, PID, local/remote address
+- UDP listener table with process mapping
+- Color-coded flags — `PUBLIC` for internet-bound traffic, `ALERT` for high-risk ports (SMB, RDP, WinRM, etc.)
+- Dark themed ANSI console UI with alternating row shading
+- Pause/resume with `P` to freeze output for inspection
+- Background logging to `connections.log`
 
-##  Prerequisities
+## Requirements
 
-*   **OS:** Windows 10 or Windows 11.
-*   **Permissions:** **Administrator privileges** are highly recommended.
-    *   *Why?* Without Admin rights, Windows hides the process names of system services (showing them as "Unknown"), limiting the tool's effectiveness.
+- Windows 10 or later
+- Visual Studio 2019+ with C++ Desktop Development workload
+- Run as Administrator for full process visibility
 
-##  Installation & Building
+## Build
 
-No installation is required, just a single executable. To build from source:
-
-### Requirements
-*   Visual Studio (2019/2022) with C++ Desktop Development credentials.
-*   Windows SDK.
-
-  
-##  User Guide
-
-### 1. Starting the Monitor
-
-To compile the source, open a command prompt and run this , in the directory of the project: cl main.cpp /link iphlpapi.lib ws2_32.lib
-Open a command prompt (cmd or powershell) as Administrator and run the tool:
-```
-cmd NetMonitor.exe
-```
-OR
-
-Right click , run as Admin. (optional but recommended)
-
-
-### 2. Reading the Output
-The main screen is divided into two sections:
-
-**Active TCP Connections**
-Shows established connections to other machines.
-```
-Process                        PID      Local Address             Remote Address            Notes
-----------------------------------------------------------------------------------------------------
-chrome.exe                     1420     192.xxx.x.xx:52431        142.xxx.xxx.xx:443        [PUBLIC]
-svchost.exe                    844      192.xxx.x.xx:445          192.xxx.x.xx:5985         [SUSPICIOUS]
-```
-*   **Process:** The executable name.
-*   **Remote Address:** Where the data is going.
-*   **Notes:** Look for `[PUBLIC]` (Internet traffic) or `[SUSPICIOUS]` (Potential risks).
-
-**Active UDP Listeners**
-Shows ports your computer is listing on.
-```
-Process                        PID      Local Address             Notes
-----------------------------------------------------------------------------------------------------
-Discord.exe                    9120     0.0.0.0:50002             
-```
-
-### 3. Controls
-*   **Pause/Resume:** Press **`P`** on your keyboard.
-    *   This stops the screen from refreshing so you can copy text or analyze a specific moment.
-    *   Background logging also pauses to prevent log spam.
-*   **Exit:** Press **`Ctrl+C`**.
-
-### 4. Logging
-Check the `connections.log` file created in the same directory. It contains a historical record of what the monitor saw, useful for spotting transient connections that appeared and vanished quickly.
+From a Developer Command Prompt:
 
 ```
-TCP chrome.exe (1420) 192.xxx.x.xx:52431 -> 142.xxx.xxx.xxx:443 [PUBLIC]
-UDP Discord.exe (9120) 0.0.0.0:50002
+cl core.cpp /EHsc /link iphlpapi.lib ws2_32.lib /out:NetMonitor.exe
 ```
+
+Or run the included `build.bat` from a Developer Command Prompt.
+
+## Usage
+
+```
+NetMonitor.exe
+```
+
+Run as Administrator for best results. Without elevation, system service process names show as `System`.
+
+| Key | Action |
+|---|---|
+| `P` | Pause / Resume |
+| `Ctrl+C` | Exit |
+
+The display is split into two sections:
+
+**TCP Connections** — active connections with remote endpoints. `PUBLIC` flags traffic leaving your local network. `ALERT` marks connections on commonly targeted ports (25, 135, 139, 445, 3389, 5985).
+
+**UDP Listeners** — local ports with a bound process.
+
+All activity is appended to `connections.log` while the monitor is running. Pausing stops logging.
 
 ## Disclaimer
-This tool is for educational and administrative monitoring purposes. It reads system connection tables using standard Windows APIs (`GetExtendedTcpTable`). It does not packet sniff, intercept SSL, or modify traffic.
+
+Reads system connection tables via standard Windows APIs. Does not capture packets, intercept TLS, or modify traffic.
